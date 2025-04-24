@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/akuity/kargo-render/internal/azuredevops"
 	"github.com/akuity/kargo-render/internal/github"
 	"github.com/akuity/kargo-render/pkg/git"
 )
@@ -20,28 +21,48 @@ func openPR(ctx context.Context, rc requestContext) (string, error) {
 		title =
 			fmt.Sprintf("%s <-- latest batched changes", rc.request.TargetBranch)
 	}
-
 	// TODO: Support git providers other than GitHub.
 	//
 	// Wish list:
 	//
 	// * GitHub Enterprise
 	// * Bitbucket
-	// * Azure DevOps
 	// * GitLab
 	// * Other?
-	url, err := github.OpenPR(
-		ctx,
-		rc.request.RepoURL,
-		title,
-		"See individual commit messages for details.",
-		rc.request.TargetBranch,
-		rc.target.commit.branch,
-		git.RepoCredentials{
-			Username: rc.request.RepoCreds.Username,
-			Password: rc.request.RepoCreds.Password,
-		},
-	)
+
+	// Determine the Git provider based on the repository URL
+	var url string
+	var err error
+
+	if strings.Contains(rc.request.RepoURL, "dev.azure.com") {
+		// Azure DevOps repository
+		url, err = azuredevops.OpenPR(
+			ctx,
+			rc.request.RepoURL,
+			title,
+			"See individual commit messages for details.",
+			rc.request.TargetBranch,
+			rc.target.commit.branch,
+			git.RepoCredentials{
+				Username: rc.request.RepoCreds.Username,
+				Password: rc.request.RepoCreds.Password,
+			},
+		)
+	} else {
+		// Default to GitHub
+		url, err = github.OpenPR(
+			ctx,
+			rc.request.RepoURL,
+			title,
+			"See individual commit messages for details.",
+			rc.request.TargetBranch,
+			rc.target.commit.branch,
+			git.RepoCredentials{
+				Username: rc.request.RepoCreds.Username,
+				Password: rc.request.RepoCreds.Password,
+			},
+		)
+	}
 	// TODO: Catch specific errors that have to do with an open PR already being
 	// associated with the target branch
 	if err != nil {

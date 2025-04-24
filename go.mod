@@ -9,6 +9,8 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 )
 
+require github.com/microsoft/azure-devops-go-api/azuredevops v1.0.0-b5 // indirect
+
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
