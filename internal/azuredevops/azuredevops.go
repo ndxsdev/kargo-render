@@ -99,9 +99,10 @@ func OpenPR(
 	targetBranch = ensureRefFormat(targetBranch)
 
 	// Create pull request
+	repoIDStr := repoUUID.String()
 	createPRArgs := git.CreatePullRequestArgs{
 		Project: &project,
-		RepositoryId: repoUUID,
+		RepositoryId: &repoIDStr,
 		GitPullRequestToCreate: &git.GitPullRequest{
 			Title:         &title,
 			Description:   &description,
